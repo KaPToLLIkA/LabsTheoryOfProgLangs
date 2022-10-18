@@ -1,67 +1,73 @@
 #include <iostream>
 #include <vector>
 #include <stack>
-#include <iterator>
-#include <algorithm>
-#include <cassert>
 
-using namespace std;
+template <typename T>
+class PatienceSorter 
+{
+    std::vector<std::stack<T>> sorting_plate;
 
-template <class E>
-struct pile_less {
-    bool operator()(const stack<E>& pile1, const stack<E>& pile2) const {
-        return pile1.top() < pile2.top();
-    }
+public:
+    void sort(std::vector<T> &sequence);
 };
 
-template <class E>
-struct pile_greater {
-    bool operator()(const stack<E>& pile1, const stack<E>& pile2) const {
-        return pile1.top() > pile2.top();
+int main() 
+{
+    std::vector<int> a = { 4, 65, 2, -31, 0, 99, 83, 782, 1 };
+
+    auto sorter = PatienceSorter<int>();
+
+    sorter.sort(a);
+
+    for (const auto& item : a)
+    {
+        std::cout << item << " " << std::endl;
     }
-};
-
-
-template <class Iterator>
-void patience_sort(Iterator first, Iterator last) {
-    typedef typename iterator_traits<Iterator>::value_type E;
-    typedef stack<E> Pile;
-
-    std::vector<Pile> piles;
-
-    for (Iterator it = first; it != last; it++) {
-        E& x = *it;
-        Pile newPile;
-        newPile.push(x);
-        typename std::vector<Pile>::iterator i =
-            std::lower_bound(piles.begin(), piles.end(), newPile, pile_less<E>());
-        if (i != piles.end())
-            i->push(x);
-        else
-            piles.push_back(newPile);
-    }
-
-    std::make_heap(piles.begin(), piles.end(), pile_greater<E>());
-    for (Iterator it = first; it != last; it++) {
-        std::pop_heap(piles.begin(), piles.end(), pile_greater<E>());
-        Pile& smallPile = piles.back();
-        *it = smallPile.top();
-        smallPile.pop();
-        if (smallPile.empty())
-            piles.pop_back();
-        else
-            std::push_heap(piles.begin(), piles.end(), pile_greater<E>());
-    }
-    assert(piles.empty());
-}
-
-
-int main() {
-    int a[] = { 4, 65, 2, -31, 0, 99, 83, 782, 1 };
-    patience_sort(a, a + sizeof(a) / sizeof(*a));
-    std::copy(a, a + sizeof(a) / sizeof(*a), std::ostream_iterator<int>(std::cout, ", "));
-    std::cout << std::endl;
-
 
     return 0;
+}
+
+template<typename T>
+void PatienceSorter<T>::sort(std::vector<T>& sequence)
+{
+    for (const auto& item : sequence) 
+    {
+        sorting_plate.push_back(std::stack<T>());
+
+        for (auto& heap : sorting_plate) 
+        {
+            if (heap.empty() || (!heap.empty() && heap.top() >= item))
+            {
+                heap.push(item);
+                break;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < sequence.size(); ++i) 
+    {
+        T local_min = sorting_plate[0].top();
+        int32_t heap_index = -1;
+
+        for (size_t h = 0; h < sorting_plate.size(); ++h) 
+        {
+            if (sorting_plate[h].empty()) 
+            {
+                break;
+            }
+            else if (heap_index == -1 || (heap_index != -1 && sorting_plate[h].top() < local_min))
+            {
+                local_min = sorting_plate[h].top();
+                heap_index = h;
+            }
+        }
+
+        sequence[i] = local_min;
+        sorting_plate[heap_index].pop();
+        
+        if (sorting_plate[heap_index].empty()) 
+        {
+            sorting_plate.erase(sorting_plate.begin() + heap_index);
+        }
+    }
 }
