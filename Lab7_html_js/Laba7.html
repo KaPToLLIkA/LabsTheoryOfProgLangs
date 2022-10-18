@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laba7</title>
+
+  <!-- Bootstrap CSS (jsDelivr CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
+  <!-- Bootstrap Bundle JS (jsDelivr CDN) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ" crossorigin="anonymous"></script>
+
+  </head>
+  <body>
+    <!--Создаем форму -->
+    <form class="form" style="padding: 8px">
+    <p class="text-start" >Введите числа:</p>
+      <div class="input-group mb-3">
+        <input id="txt1" type="text" class="form-control" placeholder="Числа" aria-label="text" aria-describedby="basic-addon1">
+      </div>
+    <button type="button" class="btn btn-primary" id="button">Сортировать</button>
+    <p class="text-start" id="txtprev1"></p>
+    </form>
+ </body>
+</html>
+ 
+ <script>
+   function click(){
+    var text = document.getElementById("txt1").value
+    text = text.replace(' ', '');
+    document.getElementById('txtprev1').innerHTML = patienceSort(text.split(","));
+   }
+
+ button.onclick=click;
+
+const patienceSort = (nums) => {
+  const piles = []
+
+  for (let i = 0; i < nums.length; i++) {
+    const num = nums[i]
+    const destinationPileIndex = piles.findIndex(
+      (pile) => num >= pile[pile.length - 1]
+    )
+    if (destinationPileIndex === -1) {
+      piles.push([num])
+    } else {
+      piles[destinationPileIndex].push(num)
+    }
+  }
+
+  for (let i = 0; i < nums.length; i++) {
+    let destinationPileIndex = 0
+    for (let p = 1; p < piles.length; p++) {
+      const pile = piles[p]
+      if (pile[0] < piles[destinationPileIndex][0]) {
+        destinationPileIndex = p
+      }
+    }
+    const distPile = piles[destinationPileIndex]
+    nums[i] = distPile.shift()
+    if (distPile.length === 0) {
+      piles.splice(destinationPileIndex, 1)
+    }
+  }
+
+  return nums
+}
+  </script>
